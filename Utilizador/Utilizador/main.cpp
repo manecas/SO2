@@ -109,10 +109,10 @@ int _tmain() {
 	TCHAR myText[MSGSIZE];
 	Shared_MSG currentMSG;
 
-	/*#ifdef UNICODE
+	#ifdef UNICODE
 		_setmode(_fileno(stdin), _O_WTEXT);
 		_setmode(_fileno(stdout), _O_WTEXT);
-	#endif*/
+	#endif
 
 	_tprintf(TEXT("Cliente de Msg a iniciar.\n"));
 	_tprintf(TEXT("Vou abrir a memoria partilhada.\n"));
@@ -145,7 +145,12 @@ int _tmain() {
 	_tprintf(TEXT("Vou lançar a thread para ouvir o que se passa.\n"));
 	cdata.ThreadDeveContinuar = 1;
 	cdata.ServidorContinua = 1;
-	thnd = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)listenerThread, (LPVOID)&cdata, THREAD_ALL_ACCESS, &tid);
+	thnd = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)listenerThread, (LPVOID)&cdata, 0, &tid);
+
+	if (thnd == NULL) {
+		_tprintf(TEXT("[ERRO] Criação do listener thread\n", GetLastError()));
+		return -1;
+	}
 
 	_tprintf(TEXT("Tudo ok, Vou ver a mensagem actual.\n"));
 	readMensagem(cdata.pBuf, &currentMSG);
@@ -175,7 +180,6 @@ int _tmain() {
 
 	UnmapViewOfFile(cdata.pBuf);
 	CloseHandle(cdata.hMapFile);
-	CloseHandle(thnd);
 	_tprintf(TEXT("Ficheiro desmapeado e recursos libertados.\n"));
 
 	return 0;

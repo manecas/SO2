@@ -162,6 +162,11 @@ int _tmain() {
 	thnd = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)listenerThread, (LPVOID)&cdata, 0, &tid);
 	//thnd = OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
 
+	if (thnd == NULL) {
+		_tprintf(TEXT("[ERRO] Criação do listener thread\n"), GetLastError());
+		return -1;
+	}
+
 	_tprintf(TEXT("Careegar numa tecla para fechar o server\n"));
 	_getch();
 
