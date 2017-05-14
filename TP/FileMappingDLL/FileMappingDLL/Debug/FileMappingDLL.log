@@ -1,0 +1,14 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppClean.targets(76,5): warning : The process cannot access the file 'd:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\debug\filemappingdll.ilk' because it is being used by another process.
+  FileMapping.cpp
+d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.cpp(7): warning C4273: 'szName': inconsistent dll linkage
+  d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.h(12): note: see previous definition of 'szName'
+d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.cpp(10): warning C4273: 'writeMensagem': inconsistent dll linkage
+  d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.h(21): note: see previous definition of 'writeMensagem'
+d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.cpp(29): warning C4273: 'readMensagem': inconsistent dll linkage
+  d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.h(22): note: see previous definition of 'readMensagem'
+d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.cpp(37): warning C4273: 'peekMensagem': inconsistent dll linkage
+  d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\filemappingdll\filemappingdll\filemapping.h(23): note: see previous definition of 'peekMensagem'
+  LINK : D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\FileMappingDLL\Debug\FileMappingDLL.dll not found or not built by the last incremental link; performing full link
+     Creating library D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\FileMappingDLL\Debug\FileMappingDLL.lib and object D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\FileMappingDLL\Debug\FileMappingDLL.exp
+  FileMappingDLL.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\FileMappingDLL\Debug\FileMappingDLL.dll
+  FileMappingDLL.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\FileMappingDLL\Debug\FileMappingDLL.pdb (Full PDB)
