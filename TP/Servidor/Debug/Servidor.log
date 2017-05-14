@@ -1,0 +1,5 @@
+﻿  Source.cpp
+d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\tp\servidor\source.cpp(161): warning C4474: 'wprintf' : too many arguments passed for format string
+  d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\prática\snake\tp\servidor\source.cpp(161): note: placeholders and their parameters expect 0 variadic arguments, but 1 were provided
+  Servidor.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\TP\Debug\Servidor.exe
+  Servidor.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\TP\Debug\Servidor.pdb (Full PDB)
