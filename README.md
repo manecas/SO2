@@ -1,2 +1,2 @@
-# SO2
+# Trabalho prático - SO2 - SNAKE
 Academic project
