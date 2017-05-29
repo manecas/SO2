@@ -14,6 +14,7 @@ extern "C"
 	DLL_IMP_API typedef struct _MSG {
 		unsigned msgnum;
 		TCHAR szMessage[MSGSIZE];
+		
 	} Shared_MSG;
 
 	#define MSGBUFSIZE sizeof(Shared_MSG)
