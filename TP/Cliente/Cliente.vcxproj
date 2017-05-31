@@ -146,10 +146,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <Library Include="..\FileMappingDLL\Debug\FileMappingDLL.lib" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\FileMappingDLL\Debug\FileMappingDLL.lib" />
+    <ClCompile Include="Client.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
