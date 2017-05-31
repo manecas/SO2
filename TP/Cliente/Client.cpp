@@ -9,11 +9,13 @@
 #include <process.h>
 
 
-
+#define LIN_MAX 100
+#define COL_MAX 100
 
 // DEFINES
 #define MSGSIZE 75
 TCHAR szName[] = TEXT("memoria"); // Nome da zona de memória partilhada
+TCHAR mazeName[] = TEXT("labirinto");
 
 // NOME DOS SEMAFOROS
 TCHAR semaforoEscritaName[] = TEXT("escrita");
@@ -36,14 +38,25 @@ typedef struct _MP {
 	Shared_MSG mensagens[N];
 } Shared_MEM;
 
-
 #define MSGBUFSIZE sizeof(Shared_MEM)
+
+
+typedef struct {
+	TCHAR maze[LIN_MAX][COL_MAX];
+	int nLin;
+	int nCol;
+} Map;
+
+#define MAP_SIZE sizeof(Map)
 
 
 // CONTROLDATA TAMBÈM TEM FLAG PARA SABER SE SERVIDOR TERMINOU
 typedef struct _ControlData {
 	HANDLE hMapFile;
+	HANDLE hMapFileMaze;
+
 	Shared_MEM * pBuf;
+	Map * pMap;
 
 	HANDLE hSemaforoEscrita;
 	HANDLE hSemaforoLeitura;
@@ -206,6 +219,40 @@ int _tmain() {
 		_tprintf(TEXT("A view da memória partilhada deu azar (erro %d).\n"), GetLastError());
 		CloseHandle(cdata.hMapFile);
 		return 1;
+	}
+
+	//CRIA VISTA DO MAPA
+	cdata.hMapFileMaze = OpenFileMapping(
+		FILE_MAP_ALL_ACCESS,		// read/write access
+		FALSE,						// não herdar o nome
+		mazeName);					// nome do objecto fich. mapeado
+
+	if (cdata.hMapFileMaze == NULL) {
+		_tprintf(TEXT("A memória partilhada deu complicações (%d). Até amanhã.\n"), GetLastError());
+		return 1;
+	}
+	_tprintf(TEXT("Vou criar a view do mapa em memoria partilhada.\n"));
+
+	cdata.pMap = (Map*) MapViewOfFile(
+		cdata.hMapFileMaze,
+		FILE_MAP_ALL_ACCESS,				// Permissões read/write
+		0,
+		0,
+		MAP_SIZE);
+
+	if (cdata.pMap == NULL) {
+		_tprintf(TEXT("A view da memória partilhada deu azar (erro %d).\n"), GetLastError());
+		CloseHandle(cdata.hMapFileMaze);
+		return 1;
+	}
+
+	//IMPRIMIR MAPA
+	_tprintf(TEXT("\n\n"));
+	for (int i = 0; i < cdata.pMap->nLin; i++) {
+		for (int j = 0; j < cdata.pMap->nCol; j++) {
+			_tprintf(TEXT("%c"), cdata.pMap->maze[i][j]);
+		}
+		_tprintf(TEXT("\n\n"));
 	}
 
 	// TEM DE ESTAR AQUI A INICIALIZAÇÂO 

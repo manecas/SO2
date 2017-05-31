@@ -18,7 +18,7 @@
     <Library Include="..\FileMappingDLL\Debug\FileMappingDLL.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp">
+    <ClCompile Include="Server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

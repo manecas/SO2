@@ -15,11 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <Library Include="..\FileMappingDLL\Debug\FileMappingDLL.lib" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\FileMappingDLL\Debug\FileMappingDLL.lib" />
+    <ClCompile Include="Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

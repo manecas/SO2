@@ -1,5 +1,4 @@
 #define _CRT_SECURE_NO_WARNINGS
-
 // SERVIDOR
 
 
@@ -12,10 +11,13 @@
 #include <process.h>
 
 
+#define LIN_MAX 100
+#define COL_MAX 100
 
  // DEFINES E NOME DA MEMORIA PARTILHADA
 #define MSGSIZE 75
 TCHAR szName[] = TEXT("memoria"); // Nome da zona de memória partilhada
+TCHAR mazeName[] = TEXT("labirinto");
 
 // NOME DOS SEMAFOROS
 TCHAR semaforoEscritaName[] = TEXT("escrita");
@@ -42,12 +44,22 @@ typedef struct _MP {
 #define MSGBUFSIZE sizeof(Shared_MEM)
 
 
+typedef struct {
+	TCHAR maze[LIN_MAX][COL_MAX];
+	int nLin;
+	int nCol;
+} Map;
+
+#define MAP_SIZE sizeof(Map)
 
 typedef struct _ControlData {  // informação acerca do que a thread
 							   // deve fazer
 	
 	HANDLE hMapFile;	// HANDLE PARA A MEMORIA PARTILHADA
+	HANDLE hMapFileMaze;
+
 	Shared_MEM * pBuf;  // HANDLE PARA A ESTRUTURA SHARED_MSG QUE ESTA NA MEMORIA PARTILHADA
+	Map * pMap;
 
 	int ThreadDeveContinuar;
 
@@ -55,7 +67,6 @@ typedef struct _ControlData {  // informação acerca do que a thread
 	HANDLE hSemaforoLeitura;
 
 } ContrData;
-
 
 
 // FUNCAO APENAS PARA SACAR O NUMERO DA MENSAGEM
@@ -128,7 +139,7 @@ unsigned writeMensagem(Shared_MEM * shared, TCHAR * msgtext)
 	// Fechar mutex
 	shared->mensagens[ shared->indice_leitura].msgnum++;
 	myNum = shared->mensagens[shared->indice_leitura].msgnum;
-	_tcscpy(shared->mensagens[shared->indice_leitura].szMessage, msgtext);
+	_tcscpy(shared->mensagens[shared->indice_leitura].szMessage,msgtext);
 	// Abrir mutex
 	return myNum;
 }
@@ -214,6 +225,60 @@ int _tmain() {
 		return 1;
 	}
 
+	//PERGUNTAR TAMANHO DO LABIRINTO
+	int nLin, nCol;
+	_tprintf(TEXT("Indique o tamanho do labirinto no formato LIN COL:"));
+	_tscanf(TEXT("%d %d"), &nLin, &nCol);
+
+	//MAPA FILE MAPPING
+	cdata.hMapFileMaze = CreateFileMapping(
+		INVALID_HANDLE_VALUE,	// usar page file (=> sem ficheiro)
+		NULL,					// default security
+		PAGE_READWRITE,			// read/write
+		0,						// maximum object size (high-order DWORD)
+		MAP_SIZE,				// maximum object size (low-order DWORD)
+		mazeName);				// name of mapping object
+
+	if (cdata.hMapFileMaze == NULL) {
+		_tprintf(TEXT("ERR0  %d"), GetLastError());
+		return 1;
+	}
+	_tprintf(TEXT("A Criar View do labirinto memória mapeada\n"));
+
+	//CRIA VISTA MAPA
+	cdata.pMap = (Map*) MapViewOfFile(
+		cdata.hMapFileMaze, 
+		FILE_MAP_ALL_ACCESS, 
+		0, 
+		0, 
+		MAP_SIZE);
+
+	if (cdata.pMap == NULL) {
+		_tprintf(TEXT("ERROOO  %d  \n "), GetLastError());
+		CloseHandle(cdata.hMapFileMaze);
+		return 1;
+	}
+
+	//TAMANHO MAZE
+	cdata.pMap->nLin = nLin;
+	cdata.pMap->nCol = nCol;
+
+	//PREENCHER MEMORIA PARTILHADA
+	for (int i = 0; i < nLin; i++) {
+		for (int j = 0; j < nCol; j++) {
+			cdata.pMap->maze[i][j] = TEXT('X');
+		}
+	}
+
+	//IMPRIMIR MAPA
+	_tprintf(TEXT("\n\n"));
+	for (int i = 0; i < nLin; i++) {
+		for (int j = 0; j < nCol; j++) {
+			_tprintf(TEXT("%c"), cdata.pMap->maze[i][j]);
+		}
+		_tprintf(TEXT("\n\n"));
+	}
+
 	_tprintf(TEXT("OK, a enviar mensg \n"));
 
 	// TEM DE ESTAR AQUI A INICIALIZAÇÂO 
@@ -239,7 +304,7 @@ int _tmain() {
 	//thnd = OpenThread(THREAD_ALL_ACCESS, FALSE, tid);
 
 	if (thnd == NULL) {
-		_tprintf(TEXT("[ERRO] Criação do listener thread\n"), GetLastError());
+		_tprintf(TEXT("[ERRO] Criação do %d listener thread\n"), GetLastError());
 		return -1;
 	}
 
