@@ -1,3 +1,6 @@
 ﻿  Client.cpp
-  Cliente.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\TP\Debug\Cliente.exe
-  Cliente.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Prática\Snake\TP\Debug\Cliente.pdb (Full PDB)
+d:\snake\tp\cliente\client.cpp(151): warning C4101: 'tid': unreferenced local variable
+d:\snake\tp\cliente\client.cpp(152): warning C4101: 'thnd': unreferenced local variable
+  LINK : D:\Snake\TP\Debug\Cliente.exe not found or not built by the last incremental link; performing full link
+  Cliente.vcxproj -> D:\Snake\TP\Debug\Cliente.exe
+  Cliente.vcxproj -> D:\Snake\TP\Debug\Cliente.pdb (Full PDB)
