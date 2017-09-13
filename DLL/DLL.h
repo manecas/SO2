@@ -59,6 +59,7 @@ typedef struct Snake {
 } snake;
 
 typedef struct Jogador {
+	int num_jogadores;
 	snake snakes[2];
 } jogador;
 

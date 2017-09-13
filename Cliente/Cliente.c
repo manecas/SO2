@@ -122,6 +122,8 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	}
 
+	WaitForSingleObject(hThreadRecebeMapa, INFINITE);
+
 	CloseHandle(hMutexMemoriaPartilhada);
 	CloseHandle(threadRecebeMapa);
 	CloseHandle(hEventoTecla);

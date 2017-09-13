@@ -1,4 +1,4 @@
 ﻿  Servidor.c
-d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\snake2\snake\servidor\servidor.c(457): warning C4013: 'time' undefined; assuming extern returning int
+d:\luis\documents\dropbox\3º ano\2º semestre\sistemas operativos ii\snake2\snake\servidor\servidor.c(490): warning C4013: 'time' undefined; assuming extern returning int
   Servidor.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Snake2\Snake\Debug\Servidor.exe
   Servidor.vcxproj -> D:\Luis\Documents\Dropbox\3º Ano\2º Semestre\Sistemas Operativos II\Snake2\Snake\Debug\Servidor.pdb (Full PDB)

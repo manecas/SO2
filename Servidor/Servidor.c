@@ -150,6 +150,8 @@ void criaMapa() {
 
 void inicializaDadosJogador() {
 
+	jog.num_jogadores = NUM_JOGADORES;
+
 	WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 	mem->pontos1 = 0;
 	mem->pontos2 = 0;
@@ -161,6 +163,7 @@ void inicializaDadosJogador() {
 		jog.snakes[i].pontos = 0;
 		jog.snakes[i].tamanho = TAM_CORPO_SNAKES_JOGADORES;
 		jog.snakes[i].direcao = BAIXO;
+		jog.snakes[i].viva = TRUE;
 
 		int xComeco, yComeco;
 
@@ -211,7 +214,35 @@ void inicializaDadosSnakeAutomatica() {
 
 }
 
-void limpaCasasSnakeAutomatica() {
+void limparCasasSnake(int qual) {
+
+	for (int k = 0; k < jog.snakes[qual].tamanho; k++) {
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
+		mem->matriz[jog.snakes[qual].corpo[k].y][jog.snakes[qual].corpo[k].x] = ' ';
+		ReleaseMutex(hMutexMemoriaPartilhada);
+	}
+
+	for (int i = 0; i < ALTURA; i++) {
+		for (int j = 0; j < LARGURA; j++) {
+
+			if (i == 0 || i == ALTURA - 1) {
+				WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
+				mem->matriz[i][j] = 'X';
+				ReleaseMutex(hMutexMemoriaPartilhada);
+			}
+
+			if (j == 0 || j == LARGURA - 1) {
+				WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
+				mem->matriz[i][j] = 'X';
+				ReleaseMutex(hMutexMemoriaPartilhada);
+			}
+
+		}
+	}
+
+}
+
+void limparCasasSnakeAutomatica() {
 
 	for (int k = 0; k < snakeAutomatica.tamanho; k++) {
 		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
@@ -271,20 +302,22 @@ void validaMovimento() {
 
 }
 
-BOOL jogadoresDentroLimitesMapa() {
+void jogadoresDentroLimitesMapa() {
 
-	int quantosDentroLimite = 0;
+	for (int i = 0; i < jog.num_jogadores; i++){
 
-	for (int i = 0; i < NUM_JOGADORES; i++){
+		if (jog.snakes[i].viva == TRUE) {
+			if (jog.snakes[i].corpo[0].y > 0 && jog.snakes[i].corpo[0].y < ALTURA - 1
+				&& jog.snakes[i].corpo[0].x > 0 && jog.snakes[i].corpo[0].x < LARGURA - 1) {
+				continue;
+			}
 
-		if (jog.snakes[i].corpo[0].y > 0 && jog.snakes[i].corpo[0].y < ALTURA - 1
-			&& jog.snakes[i].corpo[0].x > 0 && jog.snakes[i].corpo[0].x < LARGURA - 1) {
-			quantosDentroLimite++;
+			jog.snakes[i].viva = FALSE;
+			jog.num_jogadores--;
 		}
 
 	}
 	
-	return quantosDentroLimite == 2 ? TRUE : FALSE;
 }
 
 BOOL SnakeAutomaticadentroLimitesMapa() {
@@ -299,8 +332,10 @@ BOOL SnakeAutomaticadentroLimitesMapa() {
 
 void movimentaSnake(int qual) {
 
-	if (jogadoresDentroLimitesMapa() == FALSE) {
-		
+	jogadoresDentroLimitesMapa();
+
+	if (jog.num_jogadores == 0) {
+		encerraThreads = TRUE;
 		return;
 	}
 
@@ -386,7 +421,7 @@ void movimentaSnake(int qual) {
 void movimentaSnakeAutomatica() {
 
 	if (SnakeAutomaticadentroLimitesMapa() == FALSE) {
-		limpaCasasSnakeAutomatica();
+		limparCasasSnakeAutomatica();
 		inicializaDadosSnakeAutomatica();
 		return;
 	}
@@ -544,6 +579,11 @@ DWORD WINAPI threadMovimentoSnake2(LPVOID lpvParam) {
 		SetEvent(hEventoMapa); //Mete a true
 		ResetEvent(hEventoMapa); //Mete a false
 
+		if (jog.snakes[1].viva == FALSE) {
+			limparCasasSnake(1);
+			break;
+		}
+
 		Sleep(VELOCIDADE_SNAKES);
 	}
 
@@ -559,6 +599,11 @@ DWORD WINAPI threadMovimentoSnake1(LPVOID lpvParam){
 
 		SetEvent(hEventoMapa); //Mete a true
 		ResetEvent(hEventoMapa); //Mete a false
+
+		if (jog.snakes[0].viva == FALSE) {
+			limparCasasSnake(0);
+			break;
+		}
 
 		Sleep(VELOCIDADE_SNAKES);
 	}
