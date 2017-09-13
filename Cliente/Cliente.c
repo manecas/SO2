@@ -15,28 +15,6 @@ HANDLE hMemoria;
 HANDLE hEventoTecla;
 HANDLE hEventoMapa;
 
-//void criaZonaMemoria() {
-//
-//	hMemoria = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(memoria), NomeMemoriaPartilhada);
-//
-//	if (hMemoria == NULL) {
-//		_tprintf(TEXT("hMemoria is NULL\n"));
-//	}
-//
-//	mem = (memoria *)MapViewOfFile(hMemoria, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(memoria));
-//
-//	if (mem == NULL) {
-//		_tprintf(TEXT("mem is NULL\n"));
-//	}
-//}
-
-//void fechaZonaMemoria() {
-//
-//	UnmapViewOfFile(mem);
-//	CloseHandle(hMemoria);
-//
-//}
-
 void mostraJogo() {
 
 	system("cls");
@@ -51,6 +29,12 @@ void mostraJogo() {
 		}
 		_tprintf(TEXT("\n"));
 	}
+
+	_tprintf(TEXT("\n"));
+	_tprintf(TEXT("\n"));
+	_tprintf(TEXT("-------------------- PONTUCAÇAO ----------------------\n"));
+	_tprintf(TEXT("Jogador 1: %d\n"), mem->pontos1);
+	_tprintf(TEXT("Jogador 2: %d\n"), mem->pontos2);
 
 }
 
@@ -131,6 +115,7 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	}
 
+	CloseHandle(threadRecebeMapa);
 	CloseHandle(hEventoTecla);
 	CloseHandle(hEventoMapa);
 	fechaZonaMemoria(hMemoria, mem);

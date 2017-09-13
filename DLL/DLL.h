@@ -19,6 +19,13 @@
 #define BAIXO 3
 #define ESQUERDA 4
 
+#define NUM_JOGADORES 2
+#define SNAKE1 0
+#define SNAKE2 1
+
+#define TAM_CORPO_SNAKES_JOGADORES 2
+#define TAM_CORPO_SNAKE_AUTOMATICA 2
+
 DLL_IMP_API TCHAR NomeMemoriaPartilhada[];
 DLL_IMP_API TCHAR EventoTecla[];
 DLL_IMP_API TCHAR EventoMapa[];
@@ -30,6 +37,7 @@ DLL_IMP_API BOOL encerraThreads;
 typedef struct Memoria {
 	TCHAR matriz[ALTURA][LARGURA];
 	TCHAR tecla;
+	int pontos1, pontos2;
 } memoria;
 
 typedef struct CorpoSnake {
@@ -38,13 +46,15 @@ typedef struct CorpoSnake {
 
 typedef struct Snake {
 	int tamanho;
+	int pontos;
 	int direcao;
 	corpo_snake corpo[TAM_CORPO_SNAKE_MAX];
 } snake;
 
 typedef struct Jogador {
 	int threadId;
-	snake sna;
+	int num_jogadores;
+	snake snakes[2];
 } jogador;
 
 //funções memória partilhada

@@ -11,13 +11,20 @@
 
 #include "..\DLL\DLL.h"
 
-#define TAM 200
+#define VELOCIDADE_SNAKES 400
 
 memoria *mem;
 jogador jog;
+snake snakeAutomatica;
 HANDLE hMemoria;
 HANDLE hEventoTecla;
 HANDLE hEventoMapa;
+
+int random(int min, int max) {
+
+	return rand() % (max - min + 1) + min;
+
+}
 
 BOOL servidorExiste() {
 
@@ -74,7 +81,7 @@ BOOL servidorExiste() {
 void fechaServidorRegistry() {
 
 	HKEY chave;
-	DWORD queAconteceu, versao, tamanho;
+	DWORD queAconteceu, versao;
 
 	//Criar/abrir uma chave em HKEY_CURRENT_USER\Software\MinhaAplicacao
 	if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Snake"), 0, NULL,
@@ -112,29 +119,98 @@ void fechaServidorRegistry() {
 	}
 }
 
-//void criaZonaMemoria() {
-//
-//	hMemoria = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(memoria), NomeMemoriaPartilhada);
-//
-//	if (hMemoria == NULL) {
-//		_tprintf(TEXT("hMemoria is NULL\n"));
-//	}
-//
-//	mem = (memoria *)MapViewOfFile(hMemoria, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(memoria));
-//
-//	if (mem == NULL) {
-//		_tprintf(TEXT("mem is NULL\n"));
-//	}
-//}
-
-//void fechaZonaMemoria() {
-//
-//	UnmapViewOfFile(mem);
-//	CloseHandle(hMemoria);
-//
-//}
-
 void criaMapa() {
+
+	for (int i = 0; i < ALTURA; i++) {
+		for (int j = 0; j < LARGURA; j++) {
+
+			if (i == 0 || i == ALTURA - 1) {
+				mem->matriz[i][j] = 'X';
+			}
+
+			if (j == 0 || j == LARGURA - 1) {
+				mem->matriz[i][j] = 'X';
+			}
+
+			if (i > 0 && i < ALTURA - 1 && j > 0 && j < LARGURA - 1) {
+
+				if (random(1, 100) == 15) {
+					mem->matriz[i][j] = '*';
+				}
+
+			}
+
+		}
+	}
+
+}
+
+void inicializaDadosJogador() {
+
+	mem->pontos1 = 0;
+	mem->pontos2 = 0;
+
+	for (int i = 0; i < NUM_JOGADORES; i++)
+	{
+
+		jog.snakes[i].pontos = 0;
+		jog.snakes[i].tamanho = TAM_CORPO_SNAKES_JOGADORES;
+		jog.snakes[i].direcao = BAIXO;
+
+		int xComeco, yComeco;
+
+		if (i == 0) {
+
+			xComeco = 3;
+			yComeco = 5;
+
+		}
+		else if(i == 1) {
+
+			xComeco = 56;
+			yComeco = 5;
+
+		}
+
+		jog.snakes[i].corpo[0].y = yComeco;
+		jog.snakes[i].corpo[0].x = xComeco;
+		yComeco--;
+
+		//Começar depois da cabeça
+		for (int k = 1; k < jog.snakes[i].tamanho; k++, yComeco--) {
+			jog.snakes[i].corpo[k].x = xComeco;
+			jog.snakes[i].corpo[k].y = yComeco;
+		}
+		
+	}
+
+}
+
+void inicializaDadosSnakeAutomatica() {
+
+	snakeAutomatica.tamanho = TAM_CORPO_SNAKE_AUTOMATICA;
+	snakeAutomatica.direcao = CIMA;
+
+	int xComeco = 30;
+	int yComeco = 20;
+
+	snakeAutomatica.corpo[0].y = yComeco;
+	snakeAutomatica.corpo[0].x = xComeco;
+	yComeco--;
+
+	//Começar depois da cabeça
+	for (int k = 1; k < snakeAutomatica.tamanho; k++, yComeco--) {
+		snakeAutomatica.corpo[k].x = xComeco;
+		snakeAutomatica.corpo[k].y = yComeco;
+	}
+
+}
+
+void limpaCasasSnakeAutomatica() {
+
+	for (int k = 0; k < snakeAutomatica.tamanho; k++) {
+		mem->matriz[snakeAutomatica.corpo[k].y][snakeAutomatica.corpo[k].x] = ' ';
+	}
 
 	for (int i = 0; i < ALTURA; i++) {
 		for (int j = 0; j < LARGURA; j++) {
@@ -150,42 +226,33 @@ void criaMapa() {
 		}
 	}
 
-	mem->matriz[2][40] = '*';
-	mem->matriz[9][30] = '*';
-	mem->matriz[20][50] = '*';
-	mem->matriz[25][1] = '*';
-
-}
-
-void inicializaDadosJogador() {
-
-	jog.sna.tamanho = 4;
-	jog.sna.direcao = DIREITA;
-	int xComeco = 7;
-	jog.sna.corpo[0].y = 15;
-	jog.sna.corpo[0].x = xComeco;
-	xComeco--;
-
-	for (int i = 1; i < jog.sna.tamanho; i++, xComeco--){
-		jog.sna.corpo[i].x = xComeco;
-		jog.sna.corpo[i].y = 15;
-	}
-
 }
 
 void validaMovimento() {
 
 	if (mem->tecla == 'w') {
-		jog.sna.direcao = CIMA;
+		jog.snakes[0].direcao = CIMA;
 	}
 	else if (mem->tecla == 'd') {
-		jog.sna.direcao = DIREITA;
+		jog.snakes[0].direcao = DIREITA;
 	}
 	else if (mem->tecla == 's') {
-		jog.sna.direcao = BAIXO;
+		jog.snakes[0].direcao = BAIXO;
 	}
 	else if (mem->tecla == 'a') {
-		jog.sna.direcao = ESQUERDA;
+		jog.snakes[0].direcao = ESQUERDA;
+	}
+	else if (mem->tecla == 'i') {
+		jog.snakes[1].direcao = CIMA;
+	}
+	else if (mem->tecla == 'l') {
+		jog.snakes[1].direcao = DIREITA;
+	}
+	else if (mem->tecla == 'k') {
+		jog.snakes[1].direcao = BAIXO;
+	}
+	else if (mem->tecla == 'j') {
+		jog.snakes[1].direcao = ESQUERDA;
 	}
 	else if (mem->tecla == 'p') {
 		encerraThreads = TRUE;
@@ -193,79 +260,287 @@ void validaMovimento() {
 
 }
 
-BOOL dentroLimitesMapa() {
+BOOL jogadoresDentroLimitesMapa() {
 
-	if (jog.sna.corpo[0].y > 0 && jog.sna.corpo[0].y < ALTURA 
-		&& jog.sna.corpo[0].x > 0 && jog.sna.corpo[0].x < LARGURA) {
+	int quantosDentroLimite = 0;
+
+	for (int i = 0; i < NUM_JOGADORES; i++){
+
+		if (jog.snakes[i].corpo[0].y > 0 && jog.snakes[i].corpo[0].y < ALTURA - 1
+			&& jog.snakes[i].corpo[0].x > 0 && jog.snakes[i].corpo[0].x < LARGURA - 1) {
+			quantosDentroLimite++;
+		}
+
+	}
+	
+	return quantosDentroLimite == 2 ? TRUE : FALSE;
+}
+
+BOOL SnakeAutomaticadentroLimitesMapa() {
+
+	if (snakeAutomatica.corpo[0].y > 0 && snakeAutomatica.corpo[0].y < ALTURA - 1
+		&& snakeAutomatica.corpo[0].x > 0 && snakeAutomatica.corpo[0].x < LARGURA - 1) {
 		return TRUE;
 	}
 
 	return FALSE;
 }
 
-DWORD WINAPI threadMovimentoSnake(LPVOID lpvParam){
+void movimentaSnake(int qual) {
+
+	if (jogadoresDentroLimitesMapa() == FALSE) {
+		encerraThreads = TRUE;
+		ExitThread(0);
+		return;
+	}
+
+	int xAnt = jog.snakes[qual].corpo[0].x;
+	int yAnt = jog.snakes[qual].corpo[0].y;
+	BOOL comeu = FALSE;
+
+	if (jog.snakes[qual].direcao == CIMA) {
+		jog.snakes[qual].corpo[0].y--;
+	}
+	else if (jog.snakes[qual].direcao == DIREITA) {
+		jog.snakes[qual].corpo[0].x++;
+	}
+	else if (jog.snakes[qual].direcao == BAIXO) {
+		jog.snakes[qual].corpo[0].y++;
+	}
+	else if (jog.snakes[qual].direcao == ESQUERDA) {
+		jog.snakes[qual].corpo[0].x--;
+	}
+
+	if (mem->matriz[jog.snakes[qual].corpo[0].y][jog.snakes[qual].corpo[0].x] == '*') {
+		comeu = TRUE;
+	}
+
+	if (qual == 0) {
+		mem->matriz[jog.snakes[qual].corpo[0].y][jog.snakes[qual].corpo[0].x] = 'O';
+	}
+	else if (qual == 1) {
+		mem->matriz[jog.snakes[qual].corpo[0].y][jog.snakes[qual].corpo[0].x] = '#';
+	}
+
+	for (int i = 1; i < jog.snakes[qual].tamanho; i++) {
+
+		int xTemp = jog.snakes[qual].corpo[i].x;
+		int	yTemp = jog.snakes[qual].corpo[i].y;
+
+		jog.snakes[qual].corpo[i].x = xAnt;
+		jog.snakes[qual].corpo[i].y = yAnt;
+
+		//mutex
+		if (qual == 0) {
+			mem->matriz[yAnt][xAnt] = 'O';
+		}
+		else if (qual == 1) {
+			mem->matriz[yAnt][xAnt] = '#';
+		}
+		//mutex
+
+		xAnt = xTemp;
+		yAnt = yTemp;
+	}
+
+	if (comeu == TRUE) {
+
+		jog.snakes[qual].tamanho++;
+		jog.snakes[qual].pontos += 2;
+		jog.snakes[qual].corpo[jog.snakes[qual].tamanho - 1].x = xAnt;
+		jog.snakes[qual].corpo[jog.snakes[qual].tamanho - 1].y = yAnt;
+
+		if (qual == 0) {
+			mem->matriz[yAnt][xAnt] = 'O';
+			mem->pontos1 = jog.snakes[qual].pontos;
+		}
+		else if (qual == 1) {
+			mem->matriz[yAnt][xAnt] = '#';
+			mem->pontos2 = jog.snakes[qual].pontos;
+		}
+
+		comeu = FALSE;
+	}
+	else {
+		mem->matriz[yAnt][xAnt] = ' ';
+	}
+
+}
+
+void movimentaSnakeAutomatica() {
+
+	if (SnakeAutomaticadentroLimitesMapa() == FALSE) {
+		limpaCasasSnakeAutomatica();
+		inicializaDadosSnakeAutomatica();
+		return;
+	}
+
+	int xAnt = snakeAutomatica.corpo[0].x;
+	int yAnt = snakeAutomatica.corpo[0].y;
+	BOOL comeu = FALSE;
+
+	if (snakeAutomatica.direcao == CIMA) {
+		snakeAutomatica.corpo[0].y--;
+	}
+	else if (snakeAutomatica.direcao == DIREITA) {
+		snakeAutomatica.corpo[0].x++;
+	}
+	else if (snakeAutomatica.direcao == BAIXO) {
+		snakeAutomatica.corpo[0].y++;
+	}
+	else if (snakeAutomatica.direcao == ESQUERDA) {
+		snakeAutomatica.corpo[0].x--;
+	}
+
+	if (mem->matriz[snakeAutomatica.corpo[0].y][snakeAutomatica.corpo[0].x] == '*') {
+		comeu = TRUE;
+	}
+
+	mem->matriz[snakeAutomatica.corpo[0].y][snakeAutomatica.corpo[0].x] = 'A';
+
+	for (int i = 1; i < snakeAutomatica.tamanho; i++) {
+
+		int xTemp = snakeAutomatica.corpo[i].x;
+		int	yTemp = snakeAutomatica.corpo[i].y;
+
+		snakeAutomatica.corpo[i].x = xAnt;
+		snakeAutomatica.corpo[i].y = yAnt;
+
+		//mutex
+		mem->matriz[yAnt][xAnt] = 'A';
+		//mutex
+
+		xAnt = xTemp;
+		yAnt = yTemp;
+	}
+
+	if (comeu == TRUE) {
+
+		snakeAutomatica.tamanho++;
+		snakeAutomatica.corpo[snakeAutomatica.tamanho - 1].x = xAnt;
+		snakeAutomatica.corpo[snakeAutomatica.tamanho - 1].y = yAnt;
+
+		mem->matriz[yAnt][xAnt] = 'A';
+
+		comeu = FALSE;
+	}
+	else {
+		mem->matriz[yAnt][xAnt] = ' ';
+	}
+
+}
+
+void escolheDirecaoRandomSnakeAutomatica() {
+
+	srand((unsigned)time(NULL));
+
+	int randomInt = random(1, 100);
+	
+	if (snakeAutomatica.direcao == CIMA) {
+
+		if (randomInt <= 30) {
+			snakeAutomatica.direcao = ESQUERDA;
+		}
+
+		if (randomInt >= 70) {
+			snakeAutomatica.direcao = DIREITA;
+		}
+
+		if (randomInt > 33 && randomInt < 70) {
+			snakeAutomatica.direcao = CIMA;
+		}
+
+	}
+	else if (snakeAutomatica.direcao == BAIXO) {
+
+		if (randomInt <= 30) {
+			snakeAutomatica.direcao = ESQUERDA;
+		}
+
+		if (randomInt >= 70) {
+			snakeAutomatica.direcao = DIREITA;
+		}
+
+		if (randomInt > 30 && randomInt < 70) {
+			snakeAutomatica.direcao = BAIXO;
+		}
+
+	}
+	else if (snakeAutomatica.direcao == ESQUERDA) {
+
+		if (randomInt <= 30) {
+			snakeAutomatica.direcao = CIMA;
+		}
+
+		if (randomInt >= 70) {
+			snakeAutomatica.direcao = ESQUERDA;
+		}
+
+		if (randomInt > 30 && randomInt < 70) {
+			snakeAutomatica.direcao = BAIXO;
+		}
+
+	}
+	else if (snakeAutomatica.direcao == DIREITA) {
+
+		if (randomInt <= 30) {
+			snakeAutomatica.direcao = CIMA;
+		}
+
+		if (randomInt >= 70) {
+			snakeAutomatica.direcao = DIREITA;
+		}
+
+		if (randomInt > 30 && randomInt < 70) {
+			snakeAutomatica.direcao = BAIXO;
+		}
+
+	}
+
+}
+
+DWORD WINAPI threadMovimentoSnakeAutomatica(LPVOID lpvParam) {
 
 	while (!encerraThreads) {
 
-		int xAnt = jog.sna.corpo[0].y;
-		int yAnt = jog.sna.corpo[0].x;
-		BOOL comeu = FALSE;
-
-		if (jog.sna.direcao == CIMA) {
-			jog.sna.corpo[0].y--;
-		}
-		else if (jog.sna.direcao == DIREITA) {
-			jog.sna.corpo[0].x++;
-		}
-		else if (jog.sna.direcao == BAIXO) {
-			jog.sna.corpo[0].y++;
-		}
-		else if (jog.sna.direcao == ESQUERDA) {
-			jog.sna.corpo[0].x--;
-		}
-
-		if (mem->matriz[jog.sna.corpo[0].y][jog.sna.corpo[0].x] == '*') {
-			comeu = TRUE;
-		}
-
-		if (dentroLimitesMapa() == FALSE) {
-			encerraThreads = TRUE;
-			ExitThread(0);
-		}
-
-		mem->matriz[jog.sna.corpo[0].y][jog.sna.corpo[0].x] = 'O';
-
-		for (int i = 1; i < jog.sna.tamanho; i++){
-
-			int xTemp = jog.sna.corpo[i].x;
-			int	yTemp = jog.sna.corpo[i].y;
-
-			jog.sna.corpo[i].x = xAnt;
-			jog.sna.corpo[i].y = yAnt;
-
-			//mutex
-			mem->matriz[xAnt][yAnt] = 'O';
-			//mutex
-
-			xAnt = xTemp;
-			yAnt = yTemp;
-		}
-
-		if (comeu == TRUE) {
-			jog.sna.tamanho++;
-			jog.sna.corpo[jog.sna.tamanho - 1].x = xAnt;
-			jog.sna.corpo[jog.sna.tamanho - 1].y = yAnt;
-			mem->matriz[xAnt][yAnt] = 'O';
-			comeu = FALSE;
-		}
-		else {
-			mem->matriz[xAnt][yAnt] = ' ';
-		}
+		escolheDirecaoRandomSnakeAutomatica();
+		movimentaSnakeAutomatica();
 
 		SetEvent(hEventoMapa); //Mete a true
 		ResetEvent(hEventoMapa); //Mete a false
 
-		Sleep(200);
+		Sleep(VELOCIDADE_SNAKES);
+	}
+
+	ExitThread(0);
+}
+
+DWORD WINAPI threadMovimentoSnake2(LPVOID lpvParam) {
+
+	while (!encerraThreads) {
+
+		movimentaSnake(SNAKE2);
+
+		SetEvent(hEventoMapa); //Mete a true
+		ResetEvent(hEventoMapa); //Mete a false
+
+		Sleep(VELOCIDADE_SNAKES);
+	}
+
+	ExitThread(0);
+
+}
+
+DWORD WINAPI threadMovimentoSnake1(LPVOID lpvParam){
+
+	while (!encerraThreads) {
+
+		movimentaSnake(SNAKE1);
+
+		SetEvent(hEventoMapa); //Mete a true
+		ResetEvent(hEventoMapa); //Mete a false
+
+		Sleep(VELOCIDADE_SNAKES);
 	}
 
 	ExitThread(0);
@@ -287,7 +562,9 @@ DWORD WINAPI threadRecebeTecla(LPVOID lpvParam){
 }
 
 int _tmain(int argc, TCHAR *argv[]) {
-	HANDLE hThreadMovimentoSnake;
+	HANDLE hThreadMovimentoSnake1;
+	HANDLE hThreadMovimentoSnake2;
+	HANDLE hThreadMovimentoSnakeAutomatica;
 	HANDLE hThreadRecebeTecla;
 
 // UNICODE 
@@ -332,9 +609,34 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	inicializaDadosJogador();
 
-	hThreadMovimentoSnake = CreateThread(NULL, 0, threadMovimentoSnake, NULL, 0, NULL);
-	if (hThreadMovimentoSnake == NULL) {
+	inicializaDadosSnakeAutomatica();
+
+	hThreadMovimentoSnake1 = CreateThread(NULL, 0, threadMovimentoSnake1, NULL, 0, NULL);
+	if (hThreadMovimentoSnake1 == NULL) {
 		_tprintf(TEXT("[Erro] Criação da thread movimento snake(%d)\n"), GetLastError());
+		CloseHandle(hEventoTecla);
+		CloseHandle(hEventoMapa);
+		fechaZonaMemoria(hMemoria, mem);
+		fechaServidorRegistry();
+		return -1;
+	}
+
+	hThreadMovimentoSnake2 = CreateThread(NULL, 0, threadMovimentoSnake2, NULL, 0, NULL);
+	if (hThreadMovimentoSnake2 == NULL) {
+		_tprintf(TEXT("[Erro] Criação da thread movimento snake(%d)\n"), GetLastError());
+		CloseHandle(hThreadMovimentoSnake1);
+		CloseHandle(hEventoTecla);
+		CloseHandle(hEventoMapa);
+		fechaZonaMemoria(hMemoria, mem);
+		fechaServidorRegistry();
+		return -1;
+	}
+
+	hThreadMovimentoSnakeAutomatica = CreateThread(NULL, 0, threadMovimentoSnakeAutomatica, NULL, 0, NULL);
+	if (hThreadMovimentoSnakeAutomatica == NULL) {
+		_tprintf(TEXT("[Erro] Criação da thread movimento snake(%d)\n"), GetLastError());
+		CloseHandle(hThreadMovimentoSnake1);
+		CloseHandle(hThreadMovimentoSnake2);
 		CloseHandle(hEventoTecla);
 		CloseHandle(hEventoMapa);
 		fechaZonaMemoria(hMemoria, mem);
@@ -345,7 +647,9 @@ int _tmain(int argc, TCHAR *argv[]) {
 	hThreadRecebeTecla = CreateThread(NULL, 0, threadRecebeTecla, NULL, 0, NULL);
 	if (hThreadRecebeTecla == NULL) {
 		_tprintf(TEXT("[Erro] Criação da thread recebe tecla (%d)\n"), GetLastError());
-		CloseHandle(hThreadMovimentoSnake);
+		CloseHandle(hThreadMovimentoSnake1);
+		CloseHandle(hThreadMovimentoSnake2);
+		CloseHandle(hThreadMovimentoSnakeAutomatica);
 		CloseHandle(hEventoTecla);
 		CloseHandle(hEventoMapa);
 		fechaZonaMemoria(hMemoria, mem);
@@ -353,11 +657,15 @@ int _tmain(int argc, TCHAR *argv[]) {
 		return -1;
 	}
 
-	WaitForSingleObject(hThreadMovimentoSnake, INFINITE);
+	WaitForSingleObject(hThreadMovimentoSnake1, INFINITE);
+	WaitForSingleObject(hThreadMovimentoSnake2, INFINITE);
+	WaitForSingleObject(hThreadMovimentoSnakeAutomatica, INFINITE);
 	WaitForSingleObject(hThreadRecebeTecla, INFINITE);
 
+	CloseHandle(hThreadMovimentoSnake1);
+	CloseHandle(hThreadMovimentoSnake2);
+	CloseHandle(hThreadMovimentoSnakeAutomatica);
 	CloseHandle(hThreadRecebeTecla);
-	CloseHandle(hThreadMovimentoSnake);
 	CloseHandle(hEventoTecla);
 	CloseHandle(hEventoMapa);
 	fechaZonaMemoria(hMemoria, mem);
