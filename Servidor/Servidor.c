@@ -16,9 +16,6 @@
 memoria *mem;
 jogador jog;
 snake snakeAutomatica;
-HANDLE hMemoria;
-HANDLE hEventoTecla;
-HANDLE hEventoMapa;
 
 int random(int min, int max) {
 
@@ -125,17 +122,23 @@ void criaMapa() {
 		for (int j = 0; j < LARGURA; j++) {
 
 			if (i == 0 || i == ALTURA - 1) {
+				WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 				mem->matriz[i][j] = 'X';
+				ReleaseMutex(hMutexMemoriaPartilhada);
 			}
 
 			if (j == 0 || j == LARGURA - 1) {
+				WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 				mem->matriz[i][j] = 'X';
+				ReleaseMutex(hMutexMemoriaPartilhada);
 			}
 
 			if (i > 0 && i < ALTURA - 1 && j > 0 && j < LARGURA - 1) {
 
 				if (random(1, 100) == 15) {
+					WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 					mem->matriz[i][j] = '*';
+					ReleaseMutex(hMutexMemoriaPartilhada);
 				}
 
 			}
@@ -147,8 +150,10 @@ void criaMapa() {
 
 void inicializaDadosJogador() {
 
+	WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 	mem->pontos1 = 0;
 	mem->pontos2 = 0;
+	ReleaseMutex(hMutexMemoriaPartilhada);
 
 	for (int i = 0; i < NUM_JOGADORES; i++)
 	{
@@ -209,18 +214,24 @@ void inicializaDadosSnakeAutomatica() {
 void limpaCasasSnakeAutomatica() {
 
 	for (int k = 0; k < snakeAutomatica.tamanho; k++) {
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 		mem->matriz[snakeAutomatica.corpo[k].y][snakeAutomatica.corpo[k].x] = ' ';
+		ReleaseMutex(hMutexMemoriaPartilhada);
 	}
 
 	for (int i = 0; i < ALTURA; i++) {
 		for (int j = 0; j < LARGURA; j++) {
 
 			if (i == 0 || i == ALTURA - 1) {
+				WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 				mem->matriz[i][j] = 'X';
+				ReleaseMutex(hMutexMemoriaPartilhada);
 			}
 
 			if (j == 0 || j == LARGURA - 1) {
+				WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 				mem->matriz[i][j] = 'X';
+				ReleaseMutex(hMutexMemoriaPartilhada);
 			}
 
 		}
@@ -289,8 +300,7 @@ BOOL SnakeAutomaticadentroLimitesMapa() {
 void movimentaSnake(int qual) {
 
 	if (jogadoresDentroLimitesMapa() == FALSE) {
-		encerraThreads = TRUE;
-		ExitThread(0);
+		
 		return;
 	}
 
@@ -330,14 +340,14 @@ void movimentaSnake(int qual) {
 		jog.snakes[qual].corpo[i].x = xAnt;
 		jog.snakes[qual].corpo[i].y = yAnt;
 
-		//mutex
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 		if (qual == 0) {
 			mem->matriz[yAnt][xAnt] = 'O';
 		}
 		else if (qual == 1) {
 			mem->matriz[yAnt][xAnt] = '#';
 		}
-		//mutex
+		ReleaseMutex(hMutexMemoriaPartilhada);
 
 		xAnt = xTemp;
 		yAnt = yTemp;
@@ -351,18 +361,24 @@ void movimentaSnake(int qual) {
 		jog.snakes[qual].corpo[jog.snakes[qual].tamanho - 1].y = yAnt;
 
 		if (qual == 0) {
+			WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 			mem->matriz[yAnt][xAnt] = 'O';
 			mem->pontos1 = jog.snakes[qual].pontos;
+			ReleaseMutex(hMutexMemoriaPartilhada);
 		}
 		else if (qual == 1) {
+			WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 			mem->matriz[yAnt][xAnt] = '#';
 			mem->pontos2 = jog.snakes[qual].pontos;
+			ReleaseMutex(hMutexMemoriaPartilhada);
 		}
 
 		comeu = FALSE;
 	}
 	else {
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 		mem->matriz[yAnt][xAnt] = ' ';
+		ReleaseMutex(hMutexMemoriaPartilhada);
 	}
 
 }
@@ -406,9 +422,9 @@ void movimentaSnakeAutomatica() {
 		snakeAutomatica.corpo[i].x = xAnt;
 		snakeAutomatica.corpo[i].y = yAnt;
 
-		//mutex
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 		mem->matriz[yAnt][xAnt] = 'A';
-		//mutex
+		ReleaseMutex(hMutexMemoriaPartilhada);
 
 		xAnt = xTemp;
 		yAnt = yTemp;
@@ -420,12 +436,16 @@ void movimentaSnakeAutomatica() {
 		snakeAutomatica.corpo[snakeAutomatica.tamanho - 1].x = xAnt;
 		snakeAutomatica.corpo[snakeAutomatica.tamanho - 1].y = yAnt;
 
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 		mem->matriz[yAnt][xAnt] = 'A';
+		ReleaseMutex(hMutexMemoriaPartilhada);
 
 		comeu = FALSE;
 	}
 	else {
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 		mem->matriz[yAnt][xAnt] = ' ';
+		ReleaseMutex(hMutexMemoriaPartilhada);
 	}
 
 }
@@ -552,9 +572,7 @@ DWORD WINAPI threadRecebeTecla(LPVOID lpvParam){
 
 		WaitForSingleObject(hEventoTecla, INFINITE);
 
-		//mutex
 		validaMovimento();
-		//mutex
 
 	}
 
@@ -578,11 +596,18 @@ int _tmain(int argc, TCHAR *argv[]) {
 		return -1;
 	}
 
+	hMutexMemoriaPartilhada = CreateMutex(NULL, FALSE, MUTEX_MEMORIA_PARTILHADA);
+	if (hMutexMemoriaPartilhada == NULL)	{
+		_tprintf(TEXT("[Erro]Criação de objecto do mutexMemoriaPartilhada(%d)\n"), GetLastError());
+		return -1;
+	}
+
 	hMemoria = criaFileMapping();
 
 	mem = criaMapView(hMemoria);
 	if (mem == NULL) {
-		_tprintf(TEXT("[Erro] Criação de objectos do Windows(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação de objectos do criaMapView(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		fechaZonaMemoria(hMemoria, mem);
 		fechaServidorRegistry();
 		return -1;
@@ -590,7 +615,8 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	hEventoTecla = CreateEvent(NULL, TRUE, FALSE, EventoTecla);
 	if (hEventoTecla == NULL) {
-		_tprintf(TEXT("[Erro] Criação de objectos do Windows(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação de objectos do EventoTecla(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		fechaZonaMemoria(hMemoria, mem);
 		fechaServidorRegistry();
 		return -1;
@@ -598,7 +624,8 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	hEventoMapa = CreateEvent(NULL, TRUE, FALSE, EventoMapa);
 	if (hEventoMapa == NULL) {
-		_tprintf(TEXT("[Erro] Criação de objectos do Windows(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação de objectos do EventoMapa(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		CloseHandle(hEventoTecla);
 		fechaZonaMemoria(hMemoria, mem);
 		fechaServidorRegistry();
@@ -613,7 +640,8 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	hThreadMovimentoSnake1 = CreateThread(NULL, 0, threadMovimentoSnake1, NULL, 0, NULL);
 	if (hThreadMovimentoSnake1 == NULL) {
-		_tprintf(TEXT("[Erro] Criação da thread movimento snake(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação da thread movimento snake 1(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		CloseHandle(hEventoTecla);
 		CloseHandle(hEventoMapa);
 		fechaZonaMemoria(hMemoria, mem);
@@ -623,7 +651,8 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	hThreadMovimentoSnake2 = CreateThread(NULL, 0, threadMovimentoSnake2, NULL, 0, NULL);
 	if (hThreadMovimentoSnake2 == NULL) {
-		_tprintf(TEXT("[Erro] Criação da thread movimento snake(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação da thread movimento snake 2(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		CloseHandle(hThreadMovimentoSnake1);
 		CloseHandle(hEventoTecla);
 		CloseHandle(hEventoMapa);
@@ -634,7 +663,8 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	hThreadMovimentoSnakeAutomatica = CreateThread(NULL, 0, threadMovimentoSnakeAutomatica, NULL, 0, NULL);
 	if (hThreadMovimentoSnakeAutomatica == NULL) {
-		_tprintf(TEXT("[Erro] Criação da thread movimento snake(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação da thread movimento snake automatica(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		CloseHandle(hThreadMovimentoSnake1);
 		CloseHandle(hThreadMovimentoSnake2);
 		CloseHandle(hEventoTecla);
@@ -647,6 +677,7 @@ int _tmain(int argc, TCHAR *argv[]) {
 	hThreadRecebeTecla = CreateThread(NULL, 0, threadRecebeTecla, NULL, 0, NULL);
 	if (hThreadRecebeTecla == NULL) {
 		_tprintf(TEXT("[Erro] Criação da thread recebe tecla (%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		CloseHandle(hThreadMovimentoSnake1);
 		CloseHandle(hThreadMovimentoSnake2);
 		CloseHandle(hThreadMovimentoSnakeAutomatica);
@@ -662,6 +693,7 @@ int _tmain(int argc, TCHAR *argv[]) {
 	WaitForSingleObject(hThreadMovimentoSnakeAutomatica, INFINITE);
 	WaitForSingleObject(hThreadRecebeTecla, INFINITE);
 
+	CloseHandle(hMutexMemoriaPartilhada);
 	CloseHandle(hThreadMovimentoSnake1);
 	CloseHandle(hThreadMovimentoSnake2);
 	CloseHandle(hThreadMovimentoSnakeAutomatica);

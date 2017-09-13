@@ -11,9 +11,6 @@
 #include "..\DLL\DLL.h"
 
 memoria *mem;
-HANDLE hMemoria;
-HANDLE hEventoTecla;
-HANDLE hEventoMapa;
 
 void mostraJogo() {
 
@@ -66,23 +63,32 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	hMemoria = criaFileMapping();
 
+	hMutexMemoriaPartilhada = CreateMutex(NULL, FALSE, MUTEX_MEMORIA_PARTILHADA);
+	if (hMutexMemoriaPartilhada == NULL) {
+		_tprintf(TEXT("[Erro]Criação de objecto mutexMemoriaPartilhada(%d)\n"), GetLastError());
+		return -1;
+	}
+
 	mem = criaMapView(hMemoria);
 	if (mem == NULL) {
-		_tprintf(TEXT("[Erro] Criação de objectos do Windows(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação de objecto mapview(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		fechaZonaMemoria(hMemoria, mem);
 		return -1;
 	}
 
 	hEventoTecla = CreateEvent(NULL, TRUE, FALSE, EventoTecla);
 	if (hEventoTecla == NULL) {
-		_tprintf(TEXT("[Erro] Criação de objectos do Windows(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação de objecto evento tecla(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		fechaZonaMemoria(hMemoria, mem);
 		return -1;
 	}
 
 	hEventoMapa = CreateEvent(NULL, TRUE, FALSE, EventoMapa);
 	if (hEventoMapa == NULL) {
-		_tprintf(TEXT("[Erro] Criação de objectos do Windows(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação de objecto evento mapa(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		CloseHandle(hEventoTecla);
 		fechaZonaMemoria(hMemoria, mem);
 		return -1;
@@ -90,7 +96,8 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	hThreadRecebeMapa = CreateThread(NULL, 0, threadRecebeMapa, NULL, 0, NULL);
 	if (hThreadRecebeMapa == NULL) {
-		_tprintf(TEXT("[Erro] Criação da thread movimento snake(%d)\n"), GetLastError());
+		_tprintf(TEXT("[Erro] Criação da thread recebe mapa(%d)\n"), GetLastError());
+		CloseHandle(hMutexMemoriaPartilhada);
 		CloseHandle(hEventoTecla);
 		CloseHandle(hEventoMapa);
 		fechaZonaMemoria(hMemoria, mem);
@@ -101,9 +108,9 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 		key = _gettch();
 
-		//mutex
+		WaitForSingleObject(hMutexMemoriaPartilhada, INFINITE);
 		mem->tecla = key;
-		//mutex
+		ReleaseMutex(hMutexMemoriaPartilhada);
 
 		SetEvent(hEventoTecla); //Mete a true
 		ResetEvent(hEventoTecla); //Mete a false
@@ -115,6 +122,7 @@ int _tmain(int argc, TCHAR *argv[]) {
 
 	}
 
+	CloseHandle(hMutexMemoriaPartilhada);
 	CloseHandle(threadRecebeMapa);
 	CloseHandle(hEventoTecla);
 	CloseHandle(hEventoMapa);

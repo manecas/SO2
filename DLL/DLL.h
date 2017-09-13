@@ -27,11 +27,17 @@
 #define TAM_CORPO_SNAKE_AUTOMATICA 2
 
 DLL_IMP_API TCHAR NomeMemoriaPartilhada[];
+
+DLL_IMP_API BOOL encerraThreads;
+
 DLL_IMP_API TCHAR EventoTecla[];
 DLL_IMP_API TCHAR EventoMapa[];
-DLL_IMP_API TCHAR *MutexInstanciaServidor;
-DLL_IMP_API HANDLE hMuteInstanciaServidor;
-DLL_IMP_API BOOL encerraThreads;
+DLL_IMP_API HANDLE hEventoTecla;
+DLL_IMP_API HANDLE hEventoMapa;
+DLL_IMP_API HANDLE hMemoria;
+
+DLL_IMP_API HANDLE hMutexMemoriaPartilhada;
+DLL_IMP_API TCHAR MUTEX_MEMORIA_PARTILHADA[];
 
 //estruturas globais
 typedef struct Memoria {
@@ -48,12 +54,11 @@ typedef struct Snake {
 	int tamanho;
 	int pontos;
 	int direcao;
+	BOOL viva;
 	corpo_snake corpo[TAM_CORPO_SNAKE_MAX];
 } snake;
 
 typedef struct Jogador {
-	int threadId;
-	int num_jogadores;
 	snake snakes[2];
 } jogador;
 

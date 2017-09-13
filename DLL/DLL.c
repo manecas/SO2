@@ -11,10 +11,13 @@
 
 //variaveis globais
 TCHAR NomeMemoriaPartilhada[] = TEXT("Memória Partilhada");
-TCHAR *Mutex = { TEXT("Mutex") };
+
+BOOL encerraThreads = FALSE;
+
 TCHAR EventoTecla[] = TEXT("EventoTecla");
 TCHAR EventoMapa[] = TEXT("EventoMapa");
-BOOL encerraThreads = FALSE;
+
+TCHAR MUTEX_MEMORIA_PARTILHADA[] = TEXT("Mutex Memoria Partilhada");
 
 //funções memória partilhada
 HANDLE criaFileMapping() {
