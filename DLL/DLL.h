@@ -21,10 +21,10 @@
 
 DLL_IMP_API TCHAR NomeMemoriaPartilhada[];
 DLL_IMP_API TCHAR EventoTecla[];
-DLL_IMP_API TCHAR *Mutex;
-DLL_IMP_API HANDLE hMutex;
-DLL_IMP_API HANDLE hMemoriaServidor;
-DLL_IMP_API HANDLE hMemoriaCliente;
+DLL_IMP_API TCHAR EventoMapa[];
+DLL_IMP_API TCHAR *MutexInstanciaServidor;
+DLL_IMP_API HANDLE hMuteInstanciaServidor;
+DLL_IMP_API BOOL encerraThreads;
 
 //estruturas globais
 typedef struct Memoria {
@@ -48,5 +48,6 @@ typedef struct Jogador {
 } jogador;
 
 //funções memória partilhada
-//DLL_IMP_API HANDLE criaZonaMemoria(memoria *mem);
-//DLL_IMP_API void fechaZonaMemoria(HANDLE hMemoriaPartilhada, memoria *mem);
+DLL_IMP_API HANDLE criaFileMapping();
+DLL_IMP_API memoria * criaMapView(HANDLE hMemoria);
+DLL_IMP_API void fechaZonaMemoria(HANDLE hMemoria, memoria *mem);
